@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 13312, guid: 0000000000000000e000000000000000, type: 0}
-  m_Name: floor_tile_carpet_transition_1_0
+  m_Name: floor
   m_EditorClassIdentifier: 
-  m_Sprite: {fileID: -2854200947176357181, guid: 2e36c416e6cfa994b9c5b868041f4d09, type: 3}
+  m_Sprite: {fileID: -3127540601076511304, guid: 777f3ebfa15d3a14e8fd9f9060f8f379, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Transform:
     e00: 1
