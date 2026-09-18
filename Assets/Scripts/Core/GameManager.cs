@@ -15,8 +15,11 @@ namespace GameCore
         public PlayerController player;
         public float moveDuration = 0.15f;
         public GameObject winPanel;
+        public GameObject allClearPanel;
         public GameObject settingsPanel;
         public TileBase defaultFloorTile;
+        [Tooltip("下一关的场景名（用于胜利面板的「下一关」按钮）")]
+        public string nextSceneName;
 
         public MapManager map;
         private UndoManager undo;
@@ -26,6 +29,7 @@ namespace GameCore
 
         [Header("Debug")]
         public bool showDebug = true;
+        public bool showMapDebug = true;
 
         void Awake()
         {
@@ -38,6 +42,7 @@ namespace GameCore
         void Start()
         {
             map.Init(config);
+            map.showDebug = showMapDebug;
             conditions.Init(config, map);
 
             if (showDebug)
@@ -246,7 +251,11 @@ namespace GameCore
         {
             if (conditions.CheckWin())
             {
-                if (winPanel != null) winPanel.SetActive(true);
+                bool isLastLevel = string.IsNullOrEmpty(nextSceneName);
+                if (isLastLevel && allClearPanel != null)
+                    allClearPanel.SetActive(true);
+                else if (winPanel != null)
+                    winPanel.SetActive(true);
                 if (showDebug) Debug.Log("You Win!");
             }
         }
@@ -254,6 +263,38 @@ namespace GameCore
         void ReloadLevel()
         {
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        }
+
+        public void NextLevel()
+        {
+            if (!string.IsNullOrEmpty(nextSceneName))
+                LevelManager.instance?.LoadScene(nextSceneName);
+            else
+                Debug.LogWarning("[GameManager] nextSceneName 未设置！");
+        }
+
+        public void BackToMenu()
+        {
+            LevelManager.instance?.LoadScene("MainMenu");
+        }
+
+        public bool IsRowSatisfied(int row)
+        {
+            return conditions.IsRowSatisfied(row);
+        }
+
+        public bool IsColSatisfied(int col)
+        {
+            return conditions.IsColSatisfied(col);
+        }
+        public bool IsRowEntrySatisfied(int row, int entryIndex)
+        {
+            return conditions.IsRowEntrySatisfied(row, entryIndex);
+        }
+
+        public bool IsColEntrySatisfied(int col, int entryIndex)
+        {
+            return conditions.IsColEntrySatisfied(col, entryIndex);
         }
     }
 }

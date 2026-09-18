@@ -171,8 +171,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   levels:
-  - {fileID: 11400000, guid: e2ffa643be30f6d4aab14f3f47d55173, type: 2}
   - {fileID: 11400000, guid: 9a49272d4a8b575468fabf92d86fa484, type: 2}
+  - {fileID: 11400000, guid: e2ffa643be30f6d4aab14f3f47d55173, type: 2}
+  - {fileID: 11400000, guid: 2a329063458ba8841b0610b6ca051a99, type: 2}
+  - {fileID: 11400000, guid: d5fa9ea0b8cc3944c8744473bbfd8256, type: 2}
+  - {fileID: 11400000, guid: a27a4e640bc48e842a2ccbd99b7c1f04, type: 2}
   cardPrefab: {fileID: 7475203539468935991, guid: fe320085721031345810225f5f2088c8, type: 3}
   contentParent: {fileID: 543678992}
 --- !u!1 &42305504
@@ -487,7 +490,7 @@ MonoBehaviour:
   m_Padding:
     m_Left: 10
     m_Right: 10
-    m_Top: 0
+    m_Top: 280
     m_Bottom: 0
   m_ChildAlignment: 4
   m_Spacing: 20
@@ -674,7 +677,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 1600, y: 400}
+  m_SizeDelta: {x: 1600, y: 600}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1122812020
 MonoBehaviour:

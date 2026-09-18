@@ -20,12 +20,14 @@ public class LevelCardUI : MonoBehaviour
             previewImage.sprite = data.previewImage;
 
         levelNameText.text = data.displayName;
-
+        if (button == null) Debug.LogError($"[LevelCardUI] button 未赋值！");
         button.onClick.AddListener(OnClicked);
     }
 
     void OnClicked()
     {
+        Debug.Log($"[LevelCardUI] 点击了卡片: {levelData?.displayName}");
+        Debug.Log($"[LevelCardUI] owner={(owner != null ? "存在" : "NULL")}, levelData={(levelData != null ? levelData.sceneName : "NULL")}");
         owner.OnLevelClicked(levelData);
     }
 }

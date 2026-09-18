@@ -137,5 +137,61 @@ namespace GameCore
             }
             return false;
         }
+        public bool IsRowSatisfied(int y)
+        {
+            if (rowConditions == null || y < 0 || y >= rowConditions.Length || rowConditions[y] == null)
+                return true;
+            if (rowConditions[y].entries.Count == 0)
+                return true;
+            int w = map.tileTypes.GetLength(0);
+            return CheckLine(CellsInRow(y, w), rowConditions[y].entries);
+        }
+
+        public bool IsColSatisfied(int x)
+        {
+            if (colConditions == null || x < 0 || x >= colConditions.Length || colConditions[x] == null)
+                return true;
+            if (colConditions[x].entries.Count == 0)
+                return true;
+            int h = map.tileTypes.GetLength(1);
+            return CheckLine(CellsInCol(x, h), colConditions[x].entries);
+        }
+
+        public bool IsRowEntrySatisfied(int y, int entryIndex)
+        {
+            if (rowConditions == null || y < 0 || y >= rowConditions.Length || rowConditions[y] == null)
+                return false;
+            if (entryIndex < 0 || entryIndex >= rowConditions[y].entries.Count)
+                return false;
+            var entry = rowConditions[y].entries[entryIndex];
+            int w = map.tileTypes.GetLength(0);
+            return IsSingleEntrySatisfied(CellsInRow(y, w), entry.color, entry.count);
+        }
+
+        public bool IsColEntrySatisfied(int x, int entryIndex)
+        {
+            if (colConditions == null || x < 0 || x >= colConditions.Length || colConditions[x] == null)
+                return false;
+            if (entryIndex < 0 || entryIndex >= colConditions[x].entries.Count)
+                return false;
+            var entry = colConditions[x].entries[entryIndex];
+            int h = map.tileTypes.GetLength(1);
+            return IsSingleEntrySatisfied(CellsInCol(x, h), entry.color, entry.count);
+        }
+
+        private bool IsSingleEntrySatisfied(List<BoxColor> line, BoxColor color, int requiredCount)
+        {
+            int total = 0;
+            foreach (var c in line)
+                if (c == color) total++;
+            if (total < requiredCount) return false;
+
+            var segments = FindSegments(line);
+            int maxLen = 0;
+            foreach (var seg in segments)
+                if (seg.color == color && seg.length > maxLen)
+                    maxLen = seg.length;
+            return maxLen == requiredCount;
+        }
     }
 }

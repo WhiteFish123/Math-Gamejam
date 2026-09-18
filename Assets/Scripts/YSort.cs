@@ -14,10 +14,10 @@ public class YSort : MonoBehaviour
         {
             Debug.LogError($"[YSort] {name} 没有 SpriteRenderer！", this);
         }
-        else
-        {
-            Debug.Log($"[YSort] {name} 初始化：SortingLayer={spriteRenderer.sortingLayerName}, OrderInLayer={spriteRenderer.sortingOrder}", this);
-        }
+        // else
+        // {
+        //     Debug.Log($"[YSort] {name} 初始化：SortingLayer={spriteRenderer.sortingLayerName}, OrderInLayer={spriteRenderer.sortingOrder}", this);
+        // }
     }
 
     void LateUpdate()

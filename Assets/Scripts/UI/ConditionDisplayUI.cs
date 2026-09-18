@@ -22,10 +22,24 @@ namespace GameCore
         [Header("Condition Colors")]
         public ConditionColorEntry[] conditionColors;
 
+        [Header("Satisfied Outline")]
+        public Color satisfiedOutlineColor = new Color32(0xE3, 0xFF, 0x00, 0xFF);
+        public float satisfiedOutlineThickness = 0.06f;
+
         [Header("Debug")]
         public bool showDebug = true;
 
-        private List<GameObject> spawned = new List<GameObject>();
+        private class LabelInfo
+        {
+            public GameObject go;
+            public bool isRow;
+            public int lineIndex;
+            public int entryIndex;
+        }
+        private List<LabelInfo> labelInfos = new List<LabelInfo>();
+
+        private ConditionManager conditionManager;
+        private MapManager mapRef;
 
         void Start()
         {
@@ -54,9 +68,9 @@ namespace GameCore
 
         void ClearDisplay()
         {
-            foreach (var go in spawned)
-                if (go != null) Destroy(go);
-            spawned.Clear();
+            foreach (var info in labelInfos)
+                if (info.go != null) Destroy(info.go);
+            labelInfos.Clear();
         }
 
         void GenerateRowLabels(MapManager map)
@@ -91,7 +105,7 @@ namespace GameCore
                     Vector3 pos = basePos + new Vector3(-grid.cellSize.x * (i + 2), 0, 0);
                     Color c = GetDisplayColor(entry.color);
                     if (showDebug) Debug.Log($"[ConditionDisplayUI] 行 {y}[{i}]：color={entry.color}, count={entry.count}, worldPos={pos}");
-                    CreateLabel(entry.count.ToString(), pos, c);
+                    CreateLabel(entry.count.ToString(), pos, c, true, y, i);
                 }
             }
         }
@@ -128,12 +142,12 @@ namespace GameCore
                     Vector3 pos = basePos + new Vector3(0, grid.cellSize.y * (i + 3), 0);
                     Color c = GetDisplayColor(entry.color);
                     if (showDebug) Debug.Log($"[ConditionDisplayUI] 列 {x}[{i}]：firstY={firstY}, color={entry.color}, count={entry.count}, worldPos={pos}");
-                    CreateLabel(entry.count.ToString(), pos, c);
+                    CreateLabel(entry.count.ToString(), pos, c, false, x, i);
                 }
             }
         }
 
-        void CreateLabel(string text, Vector3 worldPos, Color color)
+        void CreateLabel(string text, Vector3 worldPos, Color color, bool isRow, int lineIndex, int entryIndex)
         {
             if (textPrefab == null || canvas == null || cam == null) return;
             GameObject go = Instantiate(textPrefab, canvas.transform);
@@ -149,11 +163,42 @@ namespace GameCore
             RectTransform rt = go.GetComponent<RectTransform>();
             rt.position = screenPos;
 
-            spawned.Add(go);
+            labelInfos.Add(new LabelInfo { go = go, isRow = isRow, lineIndex = lineIndex, entryIndex = entryIndex });
+        }
+
+        void Update()
+        {
+            var gm = GameManager.instance;
+            if (gm == null) return;
+
+            foreach (var info in labelInfos)
+            {
+                bool satisfied = info.isRow
+                    ? gm.IsRowEntrySatisfied(info.lineIndex, info.entryIndex)
+                    : gm.IsColEntrySatisfied(info.lineIndex, info.entryIndex);
+
+                var tmp = info.go.GetComponent<TextMeshProUGUI>();
+                if (tmp != null)
+                {
+                    if (satisfied)
+                    {
+                        tmp.fontMaterial.EnableKeyword("OUTLINE_ON");
+                        tmp.outlineWidth = satisfiedOutlineThickness;
+                        tmp.outlineColor = satisfiedOutlineColor;
+                    }
+                    else
+                    {
+                        tmp.fontMaterial.DisableKeyword("OUTLINE_ON");
+                        tmp.outlineWidth = 0f;
+                    }
+                }
+            }
         }
 
         Color GetDisplayColor(BoxColor boxColor)
         {
+            if (conditionColors == null || conditionColors.Length == 0)
+                return Color.white;
             foreach (var entry in conditionColors)
                 if (entry.boxColor == boxColor)
                     return entry.textColor;
