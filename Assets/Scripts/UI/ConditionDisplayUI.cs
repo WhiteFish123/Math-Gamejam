@@ -88,7 +88,7 @@ namespace GameCore
                 for (int i = 0; i < group.entries.Count; i++)
                 {
                     var entry = group.entries[i];
-                    Vector3 pos = basePos + new Vector3(-grid.cellSize.x * (i + 1), 0, 0);
+                    Vector3 pos = basePos + new Vector3(-grid.cellSize.x * (i + 2), 0, 0);
                     Color c = GetDisplayColor(entry.color);
                     if (showDebug) Debug.Log($"[ConditionDisplayUI] 行 {y}[{i}]：color={entry.color}, count={entry.count}, worldPos={pos}");
                     CreateLabel(entry.count.ToString(), pos, c);
@@ -109,13 +109,25 @@ namespace GameCore
                 var group = conds[x];
                 if (group.entries.Count == 0) continue;
 
-                Vector3 basePos = grid.GetCellCenterWorld(new Vector3Int(x, levelConfig.gridHeight, 0));
+                int firstY = -1;
+                for (int y = map.Height - 1; y >= 0; y--)
+                {
+                    var t = map.GetTileType(x, y);
+                    if (t == TileType.Floor || t == TileType.AntiStain)
+                    {
+                        firstY = y;
+                        break;
+                    }
+                }
+                if (firstY < 0) continue;
+
+                Vector3 basePos = grid.GetCellCenterWorld(new Vector3Int(x, firstY, 0));
                 for (int i = 0; i < group.entries.Count; i++)
                 {
                     var entry = group.entries[i];
-                    Vector3 pos = basePos + new Vector3(0, grid.cellSize.y * (i + 1), 0);
+                    Vector3 pos = basePos + new Vector3(0, grid.cellSize.y * (i + 3), 0);
                     Color c = GetDisplayColor(entry.color);
-                    if (showDebug) Debug.Log($"[ConditionDisplayUI] 列 {x}[{i}]：color={entry.color}, count={entry.count}, worldPos={pos}");
+                    if (showDebug) Debug.Log($"[ConditionDisplayUI] 列 {x}[{i}]：firstY={firstY}, color={entry.color}, count={entry.count}, worldPos={pos}");
                     CreateLabel(entry.count.ToString(), pos, c);
                 }
             }

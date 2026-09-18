@@ -60,8 +60,11 @@ namespace GameCore
         {
             var line = new List<BoxColor>();
             for (int x = 0; x < w; x++)
-                line.Add(map.tileTypes[x, y] == TileType.Wall || map.tileTypes[x, y] == TileType.AntiStain
+            {
+                var t = map.tileTypes[x, y];
+                line.Add(t == TileType.Wall || t == TileType.AntiStain || t == TileType.Void
                     ? BoxColor.None : map.GetColor(new Vector2Int(x, y)));
+            }
             return line;
         }
 
@@ -69,8 +72,11 @@ namespace GameCore
         {
             var line = new List<BoxColor>();
             for (int y = 0; y < h; y++)
-                line.Add(map.tileTypes[x, y] == TileType.Wall || map.tileTypes[x, y] == TileType.AntiStain
+            {
+                var t = map.tileTypes[x, y];
+                line.Add(t == TileType.Wall || t == TileType.AntiStain || t == TileType.Void
                     ? BoxColor.None : map.GetColor(new Vector2Int(x, y)));
+            }
             return line;
         }
 

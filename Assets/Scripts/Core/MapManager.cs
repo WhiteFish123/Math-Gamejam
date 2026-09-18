@@ -48,8 +48,10 @@ namespace GameCore
                     tileTypes[x, y] = TileType.AntiStain;
                 else if (IsWallAt(new Vector2Int(x, y)))
                     tileTypes[x, y] = TileType.Wall;
-                else
+                else if (floorTilemap != null && floorTilemap.HasTile(cell))
                     tileTypes[x, y] = TileType.Floor;
+                else
+                    tileTypes[x, y] = TileType.Void;
 
                 colorGrid[x, y] = 0;
             }
@@ -70,9 +72,9 @@ namespace GameCore
                 return false;
             }
             var type = tileTypes[cell.x, cell.y];
-            if (type == TileType.Wall)
-                if (showDebug) Debug.Log($"[MapManager] 撞墙：cell=({cell.x},{cell.y}), tileType=Wall");
-            return type != TileType.Wall;
+            if (type == TileType.Wall || type == TileType.Void)
+                if (showDebug) Debug.Log($"[MapManager] 不可通行：cell=({cell.x},{cell.y}), tileType={type}");
+            return type != TileType.Wall && type != TileType.Void;
         }
 
         public bool IsAntiStain(Vector2Int cell)
@@ -88,6 +90,7 @@ namespace GameCore
             if (cell.x < 0 || cell.x >= width || cell.y < 0 || cell.y >= height) return;
             if (tileTypes[cell.x, cell.y] == TileType.Wall) return;
             if (tileTypes[cell.x, cell.y] == TileType.AntiStain) { if (showDebug) Debug.Log($"[MapManager.SetColor] 跳过：防染色地板"); return; }
+            if (tileTypes[cell.x, cell.y] == TileType.Void) { if (showDebug) Debug.Log($"[MapManager.SetColor] 跳过：空白区域"); return; }
 
             Vector3Int c = new Vector3Int(cell.x, cell.y, 0);
             Vector3 worldPos = grid.GetCellCenterWorld(c);

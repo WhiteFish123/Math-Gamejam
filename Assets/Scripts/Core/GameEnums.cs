@@ -13,5 +13,6 @@ namespace GameCore
         Floor = 0,
         Wall = 1,
         AntiStain = 2,
+        Void = 3,
     }
 }
