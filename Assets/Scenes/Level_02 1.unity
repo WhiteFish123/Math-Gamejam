@@ -5441,6 +5441,11 @@ MonoBehaviour:
   cam: {fileID: 1305979333}
   grid: {fileID: 122538509}
   levelConfig: {fileID: 1297290403}
+  conditionColors:
+  - boxColor: 1
+    textColor: {r: 0, g: 0, b: 0, a: 1}
+  - boxColor: 2
+    textColor: {r: 0.09503168, g: 0.4944812, b: 0.9748427, a: 1}
   showDebug: 1
 --- !u!1 &683330397
 GameObject:
