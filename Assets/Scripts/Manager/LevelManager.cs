@@ -111,6 +111,15 @@ public class LevelManager : MonoBehaviour//场景加载管理器
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
+    public void ExitGame()
+    {
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
+    }
+
     public SceneDataSO GetSceneData(string sceneName)// 从注册表中查找场景数据。
     {
         sceneLookup.TryGetValue(sceneName, out var data);

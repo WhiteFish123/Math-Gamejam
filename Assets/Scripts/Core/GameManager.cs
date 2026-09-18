@@ -15,13 +15,17 @@ namespace GameCore
         public PlayerController player;
         public float moveDuration = 0.15f;
         public GameObject winPanel;
+        public GameObject settingsPanel;
         public TileBase defaultFloorTile;
 
-        private MapManager map;
+        public MapManager map;
         private UndoManager undo;
         private ConditionManager conditions;
         private List<Box> boxes = new List<Box>();
         private bool isAnimating;
+
+        [Header("Debug")]
+        public bool showDebug = true;
 
         void Awake()
         {
@@ -36,11 +40,14 @@ namespace GameCore
             map.Init(config);
             conditions.Init(config, map);
 
-            Debug.Log($"[GameManager] 地图范围：width={config.gridWidth}, height={config.gridHeight}, 格子索引范围=([0~{config.gridWidth-1}], [0~{config.gridHeight-1}])");
-            Debug.Log($"[GameManager] Grid name={config.grid.name}, pos={config.grid.transform.position}, cellSize={config.grid.cellSize}, InstanceID={config.grid.GetInstanceID()}");
+            if (showDebug)
+            {
+                Debug.Log($"[GameManager] 地图范围：width={config.gridWidth}, height={config.gridHeight}, 格子索引范围=([0~{config.gridWidth-1}], [0~{config.gridHeight-1}])");
+                Debug.Log($"[GameManager] Grid name={config.grid.name}, pos={config.grid.transform.position}, cellSize={config.grid.cellSize}, InstanceID={config.grid.GetInstanceID()}");
+            }
 
             Vector3Int playerCell = config.grid.WorldToCell(player.transform.position);
-            Debug.Log($"[GameManager] 玩家世界坐标={player.transform.position}, 对应格子=({playerCell.x},{playerCell.y})");
+            if (showDebug) Debug.Log($"[GameManager] 玩家世界坐标={player.transform.position}, 对应格子=({playerCell.x},{playerCell.y})");
 
             boxes.Clear();
             boxes.AddRange(FindObjectsByType<Box>(FindObjectsSortMode.None));
@@ -49,7 +56,7 @@ namespace GameCore
             {
                 Vector3Int cell = config.grid.WorldToCell(box.transform.position);
                 Vector2Int pos = new Vector2Int(cell.x, cell.y);
-                Debug.Log($"[GameManager] 箱子 {box.name}：localPos={box.transform.localPosition}, worldPos={box.transform.position}, parent={(box.transform.parent ? box.transform.parent.name : "无")}, 对应格子=({pos.x},{pos.y})");
+                if (showDebug) Debug.Log($"[GameManager] 箱子 {box.name}：localPos={box.transform.localPosition}, worldPos={box.transform.position}, parent={(box.transform.parent ? box.transform.parent.name : "无")}, 对应格子=({pos.x},{pos.y})");
                 box.Init(config.grid, pos);
                 box.isAlive = true;
 
@@ -63,20 +70,32 @@ namespace GameCore
 
         void Update()
         {
+            if (Input.GetKeyDown(KeyCode.Escape))
+                ToggleSettings();
+            if (settingsPanel != null && settingsPanel.activeSelf)
+                return;
             if (Input.GetKeyDown(KeyCode.E))
                 Undo();
             if (Input.GetKeyDown(KeyCode.R))
                 ReloadLevel();
         }
 
+        public void ToggleSettings()
+        {
+            if (settingsPanel == null) return;
+            bool open = !settingsPanel.activeSelf;
+            settingsPanel.SetActive(open);
+            player.enabled = !open;
+        }
+
         public void TryMove(Vector2Int dir)
         {
-            if (isAnimating) { Debug.Log($"[GameManager] 动画中，忽略输入"); return; }
+            if (isAnimating) { if (showDebug) Debug.Log($"[GameManager] 动画中，忽略输入"); return; }
 
             Vector2Int target = player.gridPos + dir;
-            Debug.Log($"[GameManager] 尝试移动：{player.gridPos} -> {target}");
+            if (showDebug) Debug.Log($"[GameManager] 尝试移动：{player.gridPos} -> {target}");
 
-            if (!map.IsWalkable(target)) { Debug.Log($"[GameManager] 移动失败：目标格不可通行"); return; }
+            if (!map.IsWalkable(target)) { if (showDebug) Debug.Log($"[GameManager] 移动失败：目标格不可通行"); return; }
 
             undo.Record(CaptureState());
 
@@ -86,18 +105,18 @@ namespace GameCore
             Box boxAtTarget = GetBoxAt(target);
             if (boxAtTarget != null)
             {
-                Debug.Log($"[GameManager] 目标格有箱子：{boxAtTarget.name}, 剩余推动次数={boxAtTarget.remainingPushes}");
+                if (showDebug) Debug.Log($"[GameManager] 目标格有箱子：{boxAtTarget.name}, 剩余推动次数={boxAtTarget.remainingPushes}");
                 Vector2Int boxTarget = target + dir;
                 if (!map.IsWalkable(boxTarget))
                 {
-                    Debug.Log($"[GameManager] 推箱子失败：箱子目标格 {boxTarget} 不可通行");
+                    if (showDebug) Debug.Log($"[GameManager] 推箱子失败：箱子目标格 {boxTarget} 不可通行");
                     undo.Pop();
                     return;
                 }
                 Box boxBehind = GetBoxAt(boxTarget);
                 if (boxBehind != null)
                 {
-                    Debug.Log($"[GameManager] 推箱子失败：箱子目标格 {boxTarget} 有另一个箱子 {boxBehind.name}");
+                    if (showDebug) Debug.Log($"[GameManager] 推箱子失败：箱子目标格 {boxTarget} 有另一个箱子 {boxBehind.name}");
                     undo.Pop();
                     return;
                 }
@@ -105,8 +124,13 @@ namespace GameCore
                 boxOldPos = boxAtTarget.gridPos;
                 pushedBox = boxAtTarget;
 
-                boxAtTarget.remainingPushes--;
-                boxAtTarget.UpdatePushCountDisplay();
+                bool sameColor = map.GetColor(boxTarget) == boxAtTarget.boxColor;
+                bool isAntiStain = map.IsAntiStain(boxTarget);
+                if (!sameColor && !isAntiStain)
+                {
+                    boxAtTarget.remainingPushes--;
+                    boxAtTarget.UpdatePushCountDisplay();
+                }
                 boxAtTarget.gridPos = boxTarget;
 
                 if (boxAtTarget.remainingPushes <= 0)
@@ -223,7 +247,7 @@ namespace GameCore
             if (conditions.CheckWin())
             {
                 if (winPanel != null) winPanel.SetActive(true);
-                Debug.Log("You Win!");
+                if (showDebug) Debug.Log("You Win!");
             }
         }
 

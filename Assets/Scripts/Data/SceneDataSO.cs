@@ -15,6 +15,9 @@ public class SceneDataSO : ScriptableObject
     [Tooltip("加载界面背景图（可选）")]
     public Sprite loadingBackground;
 
+    [Tooltip("关卡选择界面的预览图（可选）")]
+    public Sprite previewImage;
+
     /// <summary>
     /// 通过场景名获取 Build Settings 中的索引。
     /// 如果场景未添加到 Build Settings，返回 -1。

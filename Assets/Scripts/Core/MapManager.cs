@@ -12,8 +12,20 @@ namespace GameCore
         private Grid grid;
         private ColorPaletteSO palette;
 
+        public bool showDebug = true;
+
         public TileType[,] tileTypes;
         public int[,] colorGrid;
+
+        public int Width => width;
+        public int Height => height;
+
+        public TileType GetTileType(int x, int y)
+        {
+            if (x < 0 || x >= width || y < 0 || y >= height)
+                return TileType.Wall;
+            return tileTypes[x, y];
+        }
 
         public void Init(LevelConfig config)
         {
@@ -54,12 +66,12 @@ namespace GameCore
         {
             if (cell.x < 0 || cell.x >= width || cell.y < 0 || cell.y >= height)
             {
-                Debug.Log($"[MapManager] 越界：cell=({cell.x},{cell.y}), 地图范围=[0~{width-1}, 0~{height-1}]");
+                if (showDebug) Debug.Log($"[MapManager] 越界：cell=({cell.x},{cell.y}), 地图范围=[0~{width-1}, 0~{height-1}]");
                 return false;
             }
             var type = tileTypes[cell.x, cell.y];
             if (type == TileType.Wall)
-                Debug.Log($"[MapManager] 撞墙：cell=({cell.x},{cell.y}), tileType=Wall");
+                if (showDebug) Debug.Log($"[MapManager] 撞墙：cell=({cell.x},{cell.y}), tileType=Wall");
             return type != TileType.Wall;
         }
 
@@ -72,14 +84,14 @@ namespace GameCore
 
         public void SetColor(Vector2Int cell, BoxColor color)
         {
-            Debug.Log($"[MapManager.SetColor] 请求染色 cell=({cell.x},{cell.y}) 颜色={color}, tileType={((cell.x>=0&&cell.x<width&&cell.y>=0&&cell.y<height)?tileTypes[cell.x,cell.y].ToString():"OOB")}");
+            if (showDebug) Debug.Log($"[MapManager.SetColor] 请求染色 cell=({cell.x},{cell.y}) 颜色={color}, tileType={((cell.x>=0&&cell.x<width&&cell.y>=0&&cell.y<height)?tileTypes[cell.x,cell.y].ToString():"OOB")}");
             if (cell.x < 0 || cell.x >= width || cell.y < 0 || cell.y >= height) return;
             if (tileTypes[cell.x, cell.y] == TileType.Wall) return;
-            if (tileTypes[cell.x, cell.y] == TileType.AntiStain) { Debug.Log($"[MapManager.SetColor] 跳过：防染色地板"); return; }
+            if (tileTypes[cell.x, cell.y] == TileType.AntiStain) { if (showDebug) Debug.Log($"[MapManager.SetColor] 跳过：防染色地板"); return; }
 
             Vector3Int c = new Vector3Int(cell.x, cell.y, 0);
             Vector3 worldPos = grid.GetCellCenterWorld(c);
-            Debug.Log($"[MapManager.SetColor] 实际 SetTile cell=({c.x},{c.y},{c.z}), worldPos={worldPos}, color={color}");
+            if (showDebug) Debug.Log($"[MapManager.SetColor] 实际 SetTile cell=({c.x},{c.y},{c.z}), worldPos={worldPos}, color={color}");
             colorGrid[cell.x, cell.y] = (int)color;
             TileBase tile = palette.GetFloorTile(color);
             if (tile != null && floorTilemap != null)

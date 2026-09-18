@@ -16,3 +16,4 @@ MonoBehaviour:
   displayName: "\u5173\u5361\u4E00"
   bgmGroupName: 
   loadingBackground: {fileID: 0}
+  previewImage: {fileID: -166127948470186453, guid: 331d108205da2564d9335d7b869d7e34, type: 3}
